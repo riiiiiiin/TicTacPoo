@@ -1,5 +1,5 @@
 #include "problem/tictactoe.hpp"
-
+#include <vector>
 class TicTacToePolicy{
 public:
     int operator() (TicTacToeState state){
@@ -14,13 +14,12 @@ public:
             return state.action_space()[0]; 
         }
     }
-
 };
 
 int main(){
     TicTacToeState state;
     TicTacToePolicy policy;
-
+    
 
     // TODO: 通过与环境多次交互，学习打败X策略的方法
 

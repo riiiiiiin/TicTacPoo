@@ -56,7 +56,7 @@ private:
             _lr_target = (X|(X<<8)|(X<<16)),
             _rl_target = ((X<<4)|(X<<8)|(X<<12));
 
-        uint32_t row_target = (_row_target << (piece==O)),
+        const static uint32_t row_target = (_row_target << (piece==O)),
             column_target = (_column_target << (piece==O)),
             lr_target = (_lr_target << (piece==O)),
             rl_target = (_rl_target << (piece==O));
@@ -125,7 +125,8 @@ public:
         }
         std::cout << std::endl;
     }
-
+    const uint32_t state(){return _state;}
+    
     const TicTacToeState& next(const int& action) const override {
         static TicTacToeState next_state;
         next_state = *this;
