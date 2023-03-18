@@ -10,7 +10,7 @@ public:
             return state.action_space()[0];
         
         } else {
-            // 学习得到值函数表之后，把下面这句话替换成为根据值函数表贪心选择动作
+            //贪心选择值函数表中最优选择
             double max_val_{-3};
             int best_action_{-1};
             for(int i=0;i<state.action_space().size();++i){
@@ -33,7 +33,7 @@ int main(){
     //通过与环境多次交互，学习打败X策略的方法
     //乐：怎么10迭代就赢了呀
     std::clock_t t0=clock();
-    Td_Learning tdl(0.05,0.3,10);
+    TD_Learning tdl(0.05,0.3,10);
     tdl.expand();
     std::cout<<"<original values>"<<std::endl;
     tdl.show_values();

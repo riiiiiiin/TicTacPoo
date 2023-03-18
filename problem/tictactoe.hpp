@@ -137,6 +137,7 @@ public:
     }
 
     friend struct std::hash<TicTacToeState>;
+    
     friend bool operator== (const TicTacToeState& s1, const TicTacToeState& s2){
         return s1._state == s2._state;
     }
