@@ -1,5 +1,5 @@
-#include "problem/tictactoe.hpp"
-#include <vector>
+#include "algorithm/td.hpp"
+#include <ctime>
 class TicTacToePolicy{
 public:
     int operator() (TicTacToeState state){
@@ -19,8 +19,11 @@ public:
 int main(){
     TicTacToeState state;
     TicTacToePolicy policy;
-    
-
+    std::clock_t t0=clock();
+    Td_Learning tdl;
+    tdl.start_expand();
+    tdl.show_values();
+    std::cout<<((double)clock()-t0)/CLOCKS_PER_SEC<<std::endl;
     // TODO: 通过与环境多次交互，学习打败X策略的方法
 
 
