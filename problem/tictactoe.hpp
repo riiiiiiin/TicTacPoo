@@ -123,7 +123,7 @@ public:
             }
             std::cout << std::endl;
         }
-        std::cout <<rewards()[1]<< std::endl;
+        std::cout << std::endl;
     }
     const uint32_t state(){return _state;}
     

@@ -24,9 +24,10 @@ struct std::hash<Td_Node>{
     }
 };
 
+std::unordered_map<uint32_t,double> values;
+
 class Td_Learning{
-private:
-    std::unordered_map<uint32_t,double> _values;
+private:  
     std::unordered_map<uint32_t,Td_Node*> _all_nodes;
     Td_Node _root_node;
     double _alpha,_epsilon0;
@@ -36,7 +37,7 @@ private:
         //保险起见：该节点已终局
         if(current_node->_node.done()){
             current_node->_done=true;
-            _values[current_node->_node.state()]=current_node->_node.rewards()[1];
+            values[current_node->_node.state()]=current_node->_node.rewards()[1];
             return;
         }
         TicTacToeState state=current_node->_node;
@@ -61,14 +62,14 @@ private:
             //current_node->_node.show();//
             //std::cout<<std::endl;//
             ////////////////////////////////////////////
-            _values[current_node->_node.state()]=state.rewards()[1];
+            values[current_node->_node.state()]=state.rewards()[1];
             return;
         }
         //进入白方回合：已拜访状态，未拜访状态（终局，未终局）
         for(int i=0;i<state.action_space().size();++i){
             TicTacToeState new_state = state.next(state.action_space()[i]);
-            auto iter = _values.find(new_state.state());
-            if(iter==_values.end()){
+            auto iter = values.find(new_state.state());
+            if(iter==values.end()){
                 Td_Node* new_node= new Td_Node(new_state);
                 _all_nodes[new_state.state()]=new_node;
                 if(new_state.done()){
@@ -79,10 +80,10 @@ private:
                     ////////////////////////////////////
 
                     new_node->_done=true;
-                    _values[new_state.state()]=new_state.rewards()[1];
+                    values[new_state.state()]=new_state.rewards()[1];
                 }
                 else{
-                    _values[new_state.state()]=0;
+                    values[new_state.state()]=0;
                     _expand(new_node);
                 }
             }
@@ -91,27 +92,26 @@ private:
     }
     //第二步：epsilon-greedy采样
     const uint32_t _epsilon_greedy(double epsilon,Td_Node* cur_node_){
-        //std::bad_alloc发生位置
-        TicTacToeState state=cur_node_->_node.next(cur_node_->_node.action_space()[0]);
-        //
+        //先模拟对方下一步
+        TicTacToeState oppo_state=cur_node_->_node.next(cur_node_->_node.action_space()[0]);
         if(RandomVariables::uniform_real()>epsilon){
             //选择最优
             double max_val_{-3};
             uint32_t ret;
-            for(int i=0;i<state.n_actions();++i){
-                TicTacToeState next_state = state.next(state.action_space()[i]);
-                double cur_val_= _values[next_state.state()];
+            for(int i=0;i<oppo_state.n_actions();++i){
+                TicTacToeState candidate_state = oppo_state.next(oppo_state.action_space()[i]);
+                double cur_val_= values[candidate_state.state()];
                 if(cur_val_>=max_val_){
                     max_val_=cur_val_;
-                    ret=next_state.state();
+                    ret=candidate_state.state();
                 }
             }
             return ret;
         }
         else{
             //随机选择
-            TicTacToeState next_state =state.next(state.action_space()[RandomVariables::uniform_int()%state.n_actions()]);            
-            return next_state.state();
+            TicTacToeState candidate_state =oppo_state.next(oppo_state.action_space()[RandomVariables::uniform_int()%oppo_state.n_actions()]);            
+            return candidate_state.state();
         }
     }
     //第三步：迭代维护值函数表
@@ -126,8 +126,8 @@ private:
             assert(iter!=_all_nodes.end());
             Td_Node* selected_node = _all_nodes[eps_selection];           
             _update_values(alpha,epsilon,selected_node);
-            _values[cur_node->_node.state()]=_values[cur_node->_node.state()]
-                                            +alpha*(_values[selected_node->_node.state()]-_values[cur_node->_node.state()]);
+            values[cur_node->_node.state()]=values[cur_node->_node.state()]
+                                            +alpha*(values[selected_node->_node.state()]-values[cur_node->_node.state()]);
             return;
         }
     }
@@ -135,7 +135,7 @@ public:
     Td_Learning(double alpha,double epsilon0,int iterations):_root_node(TicTacToeState()),_alpha(alpha),
                                                             _epsilon0(epsilon0),_iterations(iterations)
                                                             {
-                                                                _values[_root_node._node.state()]=0;
+                                                                values[_root_node._node.state()]=0;
                                                             }
     ~Td_Learning(){
         //std::cout<<_all_nodes.size()<<std::endl;
@@ -144,7 +144,7 @@ public:
             delete it->second;
         }
         _all_nodes.clear();
-        _values.clear();
+        values.clear();
     }
     void expand(){
         _expand(&_root_node);
@@ -157,7 +157,7 @@ public:
     }
     //for debug:展示kv对
     void show_values(){
-        for(std::unordered_map<uint32_t,double>::iterator it=_values.begin();it!=_values.end();++it){
+        for(std::unordered_map<uint32_t,double>::iterator it=values.begin();it!=values.end();++it){
             std::cout<<it->first<<":"<<it->second<<std::endl;
         }
     }
